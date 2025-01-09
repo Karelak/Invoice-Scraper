@@ -1,5 +1,3 @@
-# filepath: /path/to/your/file.py
-
 import sqlite3
 import os
 
@@ -8,7 +6,8 @@ class DatabaseHandler:
         self.db_path = db_path
         # Ensure the directory for the database file exists
         db_dir = os.path.dirname(db_path)
-        os.makedirs(db_dir, exist_ok=True)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
         self.create_table()
 
     def create_table(self):
@@ -31,28 +30,37 @@ class DatabaseHandler:
                     total TEXT
                 )
             ''')
+            print("Table created or already exists.")
 
-    def insert_records(self, records):
-        """Insert parsed invoice records directly into database"""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            for record in records:
-                cursor.execute('''
-                    INSERT INTO invoices VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    record['invoice_number'],
-                    record['booking_reference'],
-                    record['booking_date'],
-                    record['first_name'],
-                    record['last_name'],
-                    record['date'],
-                    record['departure_time'],
-                    record['arrival_time'],
-                    record['route'],
-                    record['fare'],
-                    record['taxes'],
-                    record['fuel_surcharge'],
-                    record['ticketing_service'],
-                    record['total']
+    def insert_records(self, record):
+        """Insert a single record into the database."""
+        sql = '''INSERT INTO invoices (
+            invoice_number, booking_reference, booking_date, 
+            first_name, last_name, date, departure_time, arrival_time,
+            route, fare, taxes, fuel_surcharge, ticketing_service, total
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+        
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(sql, (
+                    record.get('invoice_number', ''),
+                    record.get('booking_reference', ''),
+                    record.get('booking_date', ''),
+                    record.get('first_name', ''),
+                    record.get('last_name', ''),
+                    record.get('date', ''),
+                    record.get('departure_time', ''),
+                    record.get('arrival_time', ''),
+                    record.get('route', ''),
+                    record.get('fare', ''),
+                    record.get('taxes', ''),
+                    record.get('fuel_surcharge', ''),
+                    record.get('ticketing_service', ''),
+                    record.get('total', '')
                 ))
-            conn.commit()
+                conn.commit()
+                print(f"Inserted record: {record}")
+        except sqlite3.Error as e:
+            print(f"Error inserting record: {e}")
+            print(f"Failed record: {record}")

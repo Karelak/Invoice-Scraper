@@ -1,5 +1,3 @@
-# filepath: /path/to/your/file.py
-
 import re
 import csv
 import os
@@ -7,11 +5,11 @@ import os
 def clean_passenger_name(full_name):
     # Remove Mr./Ms. prefix and clean up spaces
     name = re.sub(r'^(Mr\.|Ms\.)\s+', '', full_name.strip())
-    # Split into first and last name
-    parts = name.split()
+    # Split into first and last name, ensure uppercase for consistency
+    parts = name.upper().split()
     if len(parts) >= 2:
         return {'first_name': parts[0], 'last_name': ' '.join(parts[1:])}
-    return {'first_name': name, 'last_name': ''}
+    return {'first_name': name.upper(), 'last_name': ''}
 
 def convert_date_format(weekday_date):
     """Convert 'Tue 01/07' to '01-07-2024'"""
@@ -19,8 +17,26 @@ def convert_date_format(weekday_date):
     return f"{day}-{month}-2024"  # Assuming all flights are in 2024
 
 def parse_invoice_text(text):
-    # Clean up any extra whitespace and newlines
+    # Clean and prepare text
     text = re.sub(r'\s+', ' ', text)
+    
+    # Initialize dictionary for parsed data
+    parsed_data = {
+        'invoice_number': '',
+        'booking_reference': '',
+        'booking_date': '',
+        'first_name': '',
+        'last_name': '',
+        'date': '',
+        'departure_time': '',
+        'arrival_time': '',
+        'route': '',
+        'fare': '',
+        'taxes': '',
+        'fuel_surcharge': '',
+        'ticketing_service': '',
+        'total': ''
+    }
     
     data = {
         'invoice_number': re.search(r'Invoice number: (\d+)', text),
@@ -28,7 +44,7 @@ def parse_invoice_text(text):
         'booking_date': re.search(r'Booking date: (\d{2}\.\d{2}\.\d{4})', text),
         
         # Extract passenger info including their ticket numbers
-        'passengers': re.findall(r'((?:Mr\.|Ms\.)\s+[A-Z\s]+)\s+657-(\d+)', text),
+        'passengers': re.findall(r'Passenger name:\s+(?:Mr\.|Ms\.)\s+([A-Z]+)\s+([A-Z]+)\s+657-(\d+)', text),
         
         # Improved flight info matching
         'flight_info': re.findall(
@@ -47,30 +63,28 @@ def parse_invoice_text(text):
         'total': re.search(r'Total EUR\s*([\d.]+)', text)
     }
 
-    # Create a list to hold all rows of data
-    all_rows = []
-    
     # Basic data that's same for all rows
-    base_data = {
+    parsed_data.update({
         'invoice_number': data['invoice_number'].group(1) if data['invoice_number'] else '',
         'booking_reference': data['booking_reference'].group(1) if data['booking_reference'] else '',
         'booking_date': data['booking_date'].group(1) if data['booking_date'] else '',
-    }
+    })
     
     # Process passenger names
     if data['passengers']:
-        passenger = clean_passenger_name(data['passengers'][0][0])  # Take first passenger's name
-        base_data.update({
+        passenger = {
+            'first_name': data['passengers'][0][0],
+            'last_name': data['passengers'][0][1]
+        }
+        parsed_data.update({
             'first_name': passenger['first_name'],
             'last_name': passenger['last_name']
         })
     else:
-        base_data.update({'first_name': '', 'last_name': ''})
+        parsed_data.update({'first_name': '', 'last_name': ''})
 
     # Process each flight as a separate row
     for i, flight in enumerate(data['flight_info']):
-        row_data = base_data.copy()
-        
         (date, dep_time, dep_city, dep_airport, 
          arr_time, arr_city, arr_airport, 
          flight_num, flight_class) = flight
@@ -79,7 +93,7 @@ def parse_invoice_text(text):
         dep_city = dep_city.strip()
         arr_city = arr_city.strip()
         
-        row_data.update({
+        parsed_data.update({
             'date': convert_date_format(date),
             'departure_time': dep_time,
             'arrival_time': arr_time,
@@ -88,7 +102,7 @@ def parse_invoice_text(text):
         
         # Add pricing only to the last flight
         if i == len(data['flight_info']) - 1:
-            row_data.update({
+            parsed_data.update({
                 'fare': data['fare'].group(1) if data['fare'] else '0.00',
                 'taxes': data['taxes'].group(1) if data['taxes'] else '0.00',
                 'fuel_surcharge': data['fuel_surcharge'].group(1) if data['fuel_surcharge'] else '0.00',
@@ -96,17 +110,15 @@ def parse_invoice_text(text):
                 'total': data['total'].group(1) if data['total'] else '0.00'
             })
         else:
-            row_data.update({
+            parsed_data.update({
                 'fare': '',
                 'taxes': '',
                 'fuel_surcharge': '',
                 'ticketing_service': '',
                 'total': ''
             })
-        
-        all_rows.append(row_data)
     
-    return all_rows
+    return parsed_data
 
 def save_to_csv(parsed_data_rows, csv_path):
     fieldnames = [

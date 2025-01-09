@@ -1,4 +1,5 @@
 PyPDF2
+tqdm
 sqlite3
 re
 pathlib
