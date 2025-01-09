@@ -1,10 +1,14 @@
+# filepath: /path/to/your/file.py
+
 import sqlite3
 import os
 
 class DatabaseHandler:
-    def __init__(self):
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        self.db_path = os.path.join(project_root, 'invoices.db')
+    def __init__(self, db_path):
+        self.db_path = db_path
+        # Ensure the directory for the database file exists
+        db_dir = os.path.dirname(db_path)
+        os.makedirs(db_dir, exist_ok=True)
         self.create_table()
 
     def create_table(self):

@@ -16,10 +16,12 @@ Automated tool for extracting data from PDF invoices and storing it in a SQLite 
 ```
 ├── pdfs/            # Input PDF files
 ├── src/             # Source code
+│   ├── converter/   # PDF processing and invoice parsing
+│   │   ├── pdftocsv.py
+│   │   └── filterer.py
 │   ├── database/    # Database handling
-│   ├── filterer.py  # Invoice parsing logic
-│   ├── main.py      # Main execution script
-│   └── pdftocsv.py  # PDF processing
+│   │   └── db_handler.py
+│   └── main.py      # Main execution script
 └── invoices.db      # SQLite database
 ```
 
@@ -45,12 +47,16 @@ Automated tool for extracting data from PDF invoices and storing it in a SQLite 
 
 ## Usage
 
-1. Place airBaltic PDF invoices in the `pdfs/` directory
+1. Place airBaltic PDF invoices in a folder
 2. Run the script:
    ```bash
-   python -m src.main
+   python -m src.main <path_to_pdfs_folder> <path_to_db_file>
    ```
-3. Results will be stored in `invoices.db`
+   Example:
+   ```bash
+   python -m src.main pdfs/ invoices.db
+   ```
+3. Results will be stored in the specified SQLite database file
 
 ## Database Schema
 

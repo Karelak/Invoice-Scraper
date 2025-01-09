@@ -1,3 +1,5 @@
+# filepath: /path/to/your/file.py
+
 import os
 import PyPDF2
 
