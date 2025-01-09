@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Project specific
+pdfs/*
+!pdfs/.gitkeep
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
