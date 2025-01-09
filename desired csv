@@ -1,0 +1,35 @@
+# Input Example
+
+Invoice number: 2419074904
+Booking reference: O9IALK
+Booking date: 29.09.2024
+
+# Passenger Format
+
+FIRSTNAME LASTNAME # No titles (Mr./Ms.), just the plain name
+
+# Flight Info
+
+Each flight on separate row with following info:
+
+- Departure: Tue 01/07 18:50 London (Gatwick)
+- Arrival: Tue 01/07 23:35 Tallinn (Lennart Meri)
+- Route Format: London-Tallinn (BT872)
+
+# Pricing
+
+Only shown on the last flight row:
+Fare EUR 115.00
+Taxes EUR 50.59
+Fuel surcharge EUR 60.00
+Ticketing service EUR 0.39
+Total EUR 225.98
+
+# CSV Column Structure
+
+Invoice Number,Booking Reference,Booking Date,First Name,Last Name,Departure Time,Arrival Time,Route,Fare,Taxes,Fuel Surcharge,Ticketing Service,Total
+
+# Example Output (2 rows for return flight)
+
+2419074904,O9IALK,29.09.2024,KATRIN,KLIMSON,Tue 01/07 18:50,Tue 01/07 23:35,London-Tallinn (BT872),,,,,
+2419074904,O9IALK,29.09.2024,KATRIN,KLIMSON,Tue 08/07 17:00,Tue 08/07 18:00,Tallinn-London (BT871),115.00,50.59,60.00,0.39,225.98
