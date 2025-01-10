@@ -50,13 +50,11 @@ Automated tool for extracting data from PDF invoices and storing it in a SQLite 
 
 1. Place airBaltic PDF invoices in a folder
 2. Run the script:
+
    ```bash
-   python main.py -p <path_to_pdfs_folder> -d <path_to_db_file>
+   python main.py
    ```
-   Example:
-   ```bash
-   python main.py -p pdfs/ -d invoices.db
-   ```
+
 3. Results will be stored in the specified SQLite database file
 
 ## Database Schema
