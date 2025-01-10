@@ -22,8 +22,7 @@ Automated tool for extracting data from PDF invoices and storing it in a SQLite 
 │   ├── database/    # Database handling
 │   │   └── db_handler.py
 │   └── __init__.py
-├── main.py          # Main execution script
-└── invoices.db      # SQLite database
+└── main.py          # Main execution script
 ```
 
 ## Requirements
